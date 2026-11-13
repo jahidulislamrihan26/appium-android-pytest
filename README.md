@@ -8,7 +8,7 @@ Mobile UI tests written with **Appium** (UiAutomator2 driver), **Python** and **
 
 ## What it shows
 
-- **14 tests** (11 test functions, some parametrised), all passing in CI in about 2 minutes: catalog, cart, login errors, address and card validation, and a full purchase through to order confirmation.
+- **14 tests** (9 test functions, some parametrised), all passing in CI in about 2 minutes: catalog, cart, login errors, address and card validation, and a full purchase through to order confirmation.
 - **Page Object Model.** Tests call `CatalogPage`, `CartPage`, `LoginPage`, `AddressPage` and so on. No locator appears in a test.
 - **Explicit waits only.** Every action waits for its element; there is no fixed `sleep` and no implicit wait.
 - **Markers** to choose a suite: `smoke`, `regression`, and one per area (`catalog`, `cart`, `login`, `checkout`).
