@@ -44,7 +44,13 @@ class Page:
         self.wait.until(EC.invisibility_of_element_located(locator))
 
     def scroll_to_label(self, label: str):
-        """Scrolls down until the element with this accessibility label is on screen (for buttons below the fold)."""
+        """Returns the element with this accessibility label, scrolling down to it only when it is not already on screen.
+
+        Scrolling first would fail on a short screen: Android does not report a container as scrollable when everything fits.
+        """
+        already_there = self.driver.find_elements(*self.label(label))
+        if already_there and already_there[0].is_displayed():
+            return already_there[0]
         selector = (
             'new UiScrollable(new UiSelector().scrollable(true).instance(0))'
             f'.scrollIntoView(new UiSelector().description("{label}"))'
