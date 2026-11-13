@@ -5,6 +5,7 @@ these labels for assistive technology and testing, so they do not change when th
 Waits are explicit: each action waits for its element, and there is no fixed sleep and no implicit wait.
 """
 from appium.webdriver.common.appiumby import AppiumBy
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -48,9 +49,11 @@ class Page:
 
         Scrolling first would fail on a short screen: Android does not report a container as scrollable when everything fits.
         """
-        already_there = self.driver.find_elements(*self.label(label))
-        if already_there and already_there[0].is_displayed():
-            return already_there[0]
+        try:
+            # wait briefly: right after a screen opens the element may not be drawn yet, and that is not the same as "below the fold"
+            return WebDriverWait(self.driver, 8).until(EC.visibility_of_element_located(self.label(label)))
+        except TimeoutException:
+            pass
         selector = (
             'new UiScrollable(new UiSelector().scrollable(true).instance(0))'
             f'.scrollIntoView(new UiSelector().description("{label}"))'
