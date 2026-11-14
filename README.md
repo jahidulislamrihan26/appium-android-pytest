@@ -22,9 +22,11 @@ Mobile UI tests written with **Appium** (UiAutomator2 driver), **Python** and **
 |---|---|
 | Tests | 14 of 14 passed on an Android 11 (API 30) emulator in GitHub Actions |
 | Run time | about 2 minutes for the tests, plus emulator start |
+| Flakiness | the whole suite repeated 5 times: **70 of 70 executions passed**, no flaky test |
+| Negative control | a test that asserts a wrong price must fail, and does |
 | Appium / driver | Appium 3.9.0 with the UiAutomator2 driver, Appium-Python-Client 6.1.6 |
 
-This is one successful run on one emulator, not a measured reliability figure. The [Maestro project](https://github.com/jahidulislamrihan26/mobile-e2e-maestro) repeats its tests 10 times to measure flakiness; this one does not yet.
+The flakiness numbers come from running the workflow with `repeat` set to 5 (Actions tab); it writes a pass-rate table per test to the run summary. 70 passes in a row on one emulator is encouraging, not proof of zero flakiness. The negative control runs after every normal run and fails the build if it ever passes, which would mean the assertions check nothing.
 
 ## Run it
 
@@ -37,6 +39,8 @@ pip install -r requirements.txt
 bash scripts/download-app.sh          # downloads the app from its official release
 bash scripts/run-tests.sh             # starts Appium, runs every test, stops Appium
 MARKERS=smoke bash scripts/run-tests.sh
+REPEAT=5 bash scripts/run-tests.sh    # repeat the suite to measure flakiness
+python scripts/summarize_runs.py      # pass rate per test across the repeated runs
 ```
 
 In CI the same steps run on every push; the Actions tab lets you pick a marker.
@@ -47,7 +51,8 @@ In CI the same steps run on every push; the Actions tab lets you pick a marker.
 pages/        page objects (one class per screen) and shared helpers
 tests/        the tests, using only page objects
 conftest.py   one Appium session, clean app before each test, screenshot on failure
-scripts/      download the app, start Appium and run the tests
+negative-control/  a test that is wrong on purpose and must fail
+scripts/      download the app, start Appium, run the tests, summarise repeated runs
 ```
 
 ## What went wrong on the way (and what it taught)
@@ -61,5 +66,4 @@ The first CI runs did not pass, and the reasons are worth keeping:
 
 - **iOS** (XCUITest driver, simulator): not run.
 - **Real devices or a device cloud**: emulator only.
-- **Flakiness measurement**: one run so far.
 - The app is downloaded at run time and is not stored here; it is published by Sauce Labs for demos and testing, and it is not mine.
