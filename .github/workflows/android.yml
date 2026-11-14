@@ -10,6 +10,10 @@ on:
         description: 'Only run tests with this marker (smoke, regression, cart, login, checkout, catalog). Empty runs everything.'
         required: false
         default: ''
+      repeat:
+        description: 'How many times to repeat the tests, to measure flakiness (1 = a normal run)'
+        required: false
+        default: '1'
 
 permissions:
   contents: read
@@ -55,6 +59,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         env:
           MARKERS: ${{ github.event.inputs.markers }}
+          REPEAT: ${{ github.event.inputs.repeat }}
         with:
           api-level: 30
           target: aosp_atd
@@ -64,6 +69,9 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: bash scripts/run-tests.sh
+      - name: Summarise repeated runs
+        if: always() && github.event.inputs.repeat != '' && github.event.inputs.repeat != '1'
+        run: python scripts/summarize_runs.py | tee reports/flakiness.md >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7
         if: always()
         with:
